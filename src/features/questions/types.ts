@@ -21,17 +21,19 @@ export type QuestionItem = {
 };
 
 export type PublishedQuestionPayload = {
-  questionText: string;
-  questionHtml: string;
+  question: string;
+  option1: string;
+  option2: string;
+  option3: string;
+  option4: string;
+  correct_option: string;
+  explanation: string;
+  difficulty: string;
+  subject: string;
+  test_id: string;
+  topic: string;
+  sub_topic: string;
   type: "mcq";
-  options: Array<{
-    text: string;
-    isCorrect: boolean;
-  }>;
-  solution: string;
-  difficulty: TestDifficulty;
-  topicId?: string;
-  subTopicId?: string;
 };
 
 export type BulkCreateQuestionsPayload = {

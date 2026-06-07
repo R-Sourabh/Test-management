@@ -18,11 +18,6 @@ import { bulkCreateQuestions } from "@/features/questions/api";
 import type { PublishedQuestionPayload } from "@/features/questions/types";
 import { TestSummaryHeader } from "@/features/tests/TestSummaryHeader";
 
-function htmlToPlainText(html: string) {
-  const temp = document.createElement("div");
-  temp.innerHTML = html;
-  return temp.textContent || temp.innerText || "";
-}
 
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
   const hour24 = Math.floor(i / 2);
@@ -249,19 +244,26 @@ export function PreviewPublishPage() {
       }
 
       // 2. Bulk Create Questions
-      const questionsPayload: PublishedQuestionPayload[] = questions.map((q) => ({
-        questionText: htmlToPlainText(q.questionHtml),
-        questionHtml: q.questionHtml,
-        type: "mcq",
-        options: q.options.map((opt) => ({
-          text: opt.text,
-          isCorrect: opt.id === q.correctOptionId,
-        })),
-        solution: q.solution,
-        difficulty: (q.difficulty || draftMeta?.difficulty || "Easy").toLowerCase() as any,
-        topicId: q.topicId || resolvedTopicId,
-        subTopicId: q.subTopicId || resolvedSubTopicId,
-      }));
+      const questionsPayload: PublishedQuestionPayload[] = questions.map((q) => {
+        const correctIndex = q.options.findIndex((opt) => opt.id === q.correctOptionId);
+        const correctOptionKey = correctIndex >= 0 ? `option${correctIndex + 1}` : "option1";
+
+        return {
+          question: q.questionHtml,
+          option1: q.options[0]?.text || "",
+          option2: q.options[1]?.text || "",
+          option3: q.options[2]?.text || "",
+          option4: q.options[3]?.text || "",
+          correct_option: correctOptionKey,
+          explanation: q.solution || "",
+          difficulty: (q.difficulty || draftMeta?.difficulty || "easy").toLowerCase(),
+          subject: draftMeta?.subjectName || "",
+          test_id: currentTestId || "",
+          topic: "",
+          sub_topic: "",
+          type: "mcq"
+        };
+      });
 
       await bulkCreateQuestions({
         testId: currentTestId,
@@ -271,9 +273,14 @@ export function PreviewPublishPage() {
       // 3. Clear draft and go to dashboard
       clearDraft();
       navigate(ROUTES.dashboard);
-    } catch (error) {
-      console.error(error);
-      setErrorMsg("Failed to publish the test. Please check all details.");
+    } catch (error: any) {
+      console.error("Publishing error detail:", error);
+      const serverMessage = error?.response?.data?.message || error?.message;
+      setErrorMsg(
+        serverMessage
+          ? `Failed to publish: ${serverMessage}`
+          : "Failed to publish the test. Please check all details."
+      );
       setIsPublishing(false);
     }
   }
