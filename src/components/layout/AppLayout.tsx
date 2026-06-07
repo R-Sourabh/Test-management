@@ -79,6 +79,7 @@ export function AppLayout() {
 
   const handleLogout = () => {
     clearAuthToken();
+    useTestCreationStore.getState().clearDraft();
     navigate(ROUTES.login, { replace: true });
   };
 

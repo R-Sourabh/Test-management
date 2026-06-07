@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,16 @@ export function CreateEditTestPage() {
   const navigate = useNavigate();
   const draftMeta = useTestCreationStore((state) => state.testMeta);
   const setTestMeta = useTestCreationStore((state) => state.setTestMeta);
+  const clearDraft = useTestCreationStore((state) => state.clearDraft);
   const initializeQuestions = useTestCreationStore(
     (state) => state.initializeQuestions,
   );
   const [form, setForm] = useState<TestFormState>(() => getTestFormState(draftMeta));
+
+  useEffect(() => {
+    clearDraft();
+    setForm(initialTestFormState);
+  }, [clearDraft]);
 
   function updateField<K extends keyof TestFormState>(
     key: K,
