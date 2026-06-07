@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   BellIcon as Bell,
   ChevronDoubleLeftIcon as ChevronsLeft,
@@ -18,18 +19,20 @@ import {
   Cog8ToothIcon as Cog8Tooth,
   MinusCircleIcon as MinusCircle,
   ChevronDoubleRightIcon as ChevronDoubleRight,
+  ArrowLeftOnRectangleIcon as LogOutIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChevronDownIcon as ChevronDownSolid,
   CheckCircleIcon as CheckCircleSolid,
 } from "@heroicons/react/20/solid";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import avatarImage from "@/assets/avatar.png";
 import prepRouteLogo from "@/assets/login/preproute-logo.svg";
 import { ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useTestCreationStore } from "@/store/testCreationStore";
+import { clearAuthToken } from "@/lib/storage";
 
 const sidebarItems = [
   {
@@ -67,9 +70,17 @@ const questionRailIcons = [
 
 export function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const isQuestionsPage =
     location.pathname.includes("/questions") ||
     location.pathname.includes("/preview");
+
+  const handleLogout = () => {
+    clearAuthToken();
+    navigate(ROUTES.login, { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-white text-surface-dark">
@@ -126,24 +137,57 @@ export function AppLayout() {
                 <span className="absolute right-[12px] top-[12px] size-2.5 rounded-full bg-[#10B981]" />
               </button>
 
-              <div className="flex items-center gap-3">
-                <div className="relative flex items-center justify-center w-[46px] h-[46px]">
-                  <div className="absolute w-[42px] h-[42px] rounded-full border-2 border-[#6366F1] bg-[#FFD68F] translate-y-[2px]" />
-                  <img
-                    src={avatarImage}
-                    alt="Alex Wando"
-                    className="relative z-10 w-[42px] -translate-y-[2px] object-contain"
-                  />
-                </div>
-                <div className="flex min-w-0 flex-col justify-center h-[46px] pt-1">
-                  <p className="text-[17px] font-semibold leading-tight text-[#334155]">
-                    Alex Wando
-                  </p>
-                  <p className="mt-1.5 text-[14px] leading-tight text-[#475569]">
-                    Admin
-                  </p>
-                </div>
-                <ChevronDownSolid className="ml-1 size-5 text-[#334155]" />
+              <div className="relative flex items-center">
+                <button
+                  type="button"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                  className="flex items-center gap-3 focus:outline-none hover:bg-slate-50 p-1.5 rounded-xl transition-all cursor-pointer border border-transparent active:scale-[0.98]"
+                >
+                  <div className="relative flex items-center justify-center w-[46px] h-[46px]">
+                    <div className="absolute w-[42px] h-[42px] rounded-full border-2 border-[#6366F1] bg-[#FFD68F] translate-y-[2px]" />
+                    <img
+                      src={avatarImage}
+                      alt="Alex Wando"
+                      className="relative z-10 w-[42px] -translate-y-[2px] object-contain"
+                    />
+                  </div>
+                  <div className="hidden sm:flex min-w-0 flex-col justify-center text-left h-[46px] pt-1">
+                    <p className="text-[17px] font-semibold leading-tight text-[#334155]">
+                      Alex Wando
+                    </p>
+                    <p className="mt-1.5 text-[14px] leading-tight text-[#475569]">
+                      Admin
+                    </p>
+                  </div>
+                  <ChevronDownSolid className={cn("ml-1 size-5 text-[#334155] transition-transform duration-200", isPopoverOpen && "rotate-180")} />
+                </button>
+
+                {isPopoverOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40 cursor-default"
+                      onClick={() => setIsPopoverOpen(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-2 z-50 w-56 rounded-xl border border-slate-100 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <div className="px-3 py-2 text-left">
+                        <p className="text-sm font-semibold text-slate-800">Alex Wando</p>
+                        <p className="text-xs text-slate-500 mt-0.5">alex.wando@preproute.com</p>
+                        <span className="inline-block mt-1.5 rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-600">
+                          System Admin
+                        </span>
+                      </div>
+                      <div className="my-1 border-t border-slate-100" />
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium cursor-pointer"
+                      >
+                        <LogOutIcon className="size-4" strokeWidth={2} />
+                        <span>Log out</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </header>

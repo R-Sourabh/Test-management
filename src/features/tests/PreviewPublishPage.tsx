@@ -241,7 +241,8 @@ export function PreviewPublishPage() {
 
       if (!currentTestId || currentTestId === "draft-test") {
         const createRes = await createTest(testPayload);
-        if (!createRes.data.success) {
+        const isSuccess = createRes.data.status === "success" || createRes.data.success === true;
+        if (!isSuccess) {
           throw new Error("Failed to create test");
         }
         currentTestId = createRes.data.data.id;

@@ -34,7 +34,13 @@ export function DashboardPage() {
     };
   }, []);
 
-  const filteredTests = tests.filter((test) =>
+  const sortedTests = [...tests].sort((a, b) => {
+    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return dateB - dateA;
+  });
+
+  const filteredTests = sortedTests.filter((test) =>
     test.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

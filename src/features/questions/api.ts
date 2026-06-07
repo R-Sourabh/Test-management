@@ -7,9 +7,10 @@ import type {
 } from "./types";
 
 type ApiResponse<T> = {
-  success: boolean;
+  status: string;
   data: T;
   message?: string;
+  success?: boolean;
 };
 
 export function bulkCreateQuestions(payload: BulkCreateQuestionsPayload) {
